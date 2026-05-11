@@ -31,7 +31,10 @@ async function getRecentCases() {
 }
 
 export default async function HomePage() {
-  const [stats, recentCases] = await Promise.all([getStats(), getRecentCases()])
+  const [stats, recentCases] = await Promise.all([getStats(), getRecentCases()]).catch(() => [
+    { totalCases: 0, activeCases: 0, totalSightings: 0 },
+    [] as Awaited<ReturnType<typeof getRecentCases>>,
+  ])
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-12">
