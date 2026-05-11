@@ -1,0 +1,23 @@
+{
+  "headers": [
+    {
+      "source": "/api/cron/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/refresh-hearings",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/send-alerts",
+      "schedule": "0 3 * * *"
+    }
+  ]
+}

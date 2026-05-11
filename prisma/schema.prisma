@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  phone        String?
+  name         String?
+  isAdvocate   Boolean  @default(false)
+  barCouncilNo String?
+  createdAt    DateTime @default(now())
+
+  cases     Case[]
+  sightings Sighting[]
+  disputes  Dispute[]
+}
+
+model Case {
+  id        String     @id @default(cuid())
+  cnrNumber String     @unique
+  slug      String     @unique
+  status    CaseStatus @default(ACTIVE)
+
+  accusedName     String
+  accusedAliases  String[]
+  accusedCity     String?
+  accusedEmployer String?
+  accusedPhotoUrl String?
+
+  courtName        String
+  courtState       String
+  courtDistrict    String
+  caseType         String
+  caseYear         Int
+  filingDate       DateTime?
+  nextHearingDate  DateTime?
+  hearingCount     Int       @default(0)
+  missedHearings   Int       @default(0)
+  lastOrderSummary String?
+  rawEcourtsData   Json?
+
+  filedBy    User    @relation(fields: [filedById], references: [id])
+  filedById  String
+  filerRole  String
+  isVerified Boolean @default(false)
+
+  accusedStatement  String?
+  accusedResponseAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sightings Sighting[]
+  disputes  Dispute[]
+  alerts    Alert[]
+  hearings  Hearing[]
+
+  @@index([accusedName])
+  @@index([cnrNumber])
+  @@index([courtState, courtDistrict])
+}
+
+model Hearing {
+  id        String   @id @default(cuid())
+  case      Case     @relation(fields: [caseId], references: [id])
+  caseId    String
+  date      DateTime
+  purpose   String?
+  appeared  Boolean?
+  notes     String?
+  createdAt DateTime @default(now())
+}
+
+model Sighting {
+  id            String   @id @default(cuid())
+  case          Case     @relation(fields: [caseId], references: [id])
+  caseId        String
+  submittedBy   User     @relation(fields: [submittedById], references: [id])
+  submittedById String
+  sourceUrl     String
+  description   String
+  platform      String?
+  upvotes       Int      @default(0)
+  isApproved    Boolean  @default(false)
+  isRemoved     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
+
+model Dispute {
+  id          String        @id @default(cuid())
+  case        Case          @relation(fields: [caseId], references: [id])
+  caseId      String
+  filedBy     User          @relation(fields: [filedById], references: [id])
+  filedById   String
+  reason      DisputeReason
+  description String
+  status      DisputeStatus @default(PENDING)
+  resolvedAt  DateTime?
+  createdAt   DateTime      @default(now())
+}
+
+model Alert {
+  id        String    @id @default(cuid())
+  case      Case      @relation(fields: [caseId], references: [id])
+  caseId    String
+  email     String?
+  phone     String?
+  type      AlertType
+  sentAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+enum CaseStatus {
+  ACTIVE
+  RESOLVED
+  DISMISSED
+  ACQUITTED
+  ARCHIVED
+}
+
+enum DisputeReason {
+  WRONG_PERSON
+  FALSE_CASE
+  PRIVATE_INFO
+  OTHER
+}
+
+enum DisputeStatus {
+  PENDING
+  RESOLVED_REMOVED
+  RESOLVED_KEPT
+}
+
+enum AlertType {
+  HEARING_REMINDER
+  SIGHTING_ADDED
+  CASE_UPDATED
+}
