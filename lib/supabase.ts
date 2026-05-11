@@ -22,11 +22,18 @@ export const supabase = {
   auth: {
     getSession: () => getBrowserClient().auth.getSession(),
     getUser: () => getBrowserClient().auth.getUser(),
+    signUp: (
+      opts: Parameters<ReturnType<typeof createBrowserClientFn>['auth']['signUp']>[0]
+    ) => getBrowserClient().auth.signUp(opts),
+    signInWithPassword: (
+      opts: Parameters<ReturnType<typeof createBrowserClientFn>['auth']['signInWithPassword']>[0]
+    ) => getBrowserClient().auth.signInWithPassword(opts),
     signInWithOtp: (
       opts: Parameters<ReturnType<typeof createBrowserClientFn>['auth']['signInWithOtp']>[0]
     ) => getBrowserClient().auth.signInWithOtp(opts),
     signInWithOAuth: (
       opts: Parameters<ReturnType<typeof createBrowserClientFn>['auth']['signInWithOAuth']>[0]
     ) => getBrowserClient().auth.signInWithOAuth(opts),
+    signOut: () => getBrowserClient().auth.signOut(),
   },
 }
