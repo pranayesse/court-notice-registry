@@ -35,5 +35,8 @@ export const supabase = {
       opts: Parameters<ReturnType<typeof createBrowserClientFn>['auth']['signInWithOAuth']>[0]
     ) => getBrowserClient().auth.signInWithOAuth(opts),
     signOut: () => getBrowserClient().auth.signOut(),
+    onAuthStateChange: (
+      callback: Parameters<ReturnType<typeof createBrowserClientFn>['auth']['onAuthStateChange']>[0]
+    ) => getBrowserClient().auth.onAuthStateChange(callback),
   },
 }

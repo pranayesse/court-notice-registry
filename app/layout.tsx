@@ -3,6 +3,7 @@ import { Geist } from 'next/font/google'
 import './globals.css'
 import Link from 'next/link'
 import { Toaster } from '@/components/ui/sonner'
+import NavAuth from '@/components/NavAuth'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist-sans' })
 
@@ -35,9 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               >
                 File notice
               </Link>
-              <Link href="/login" className="text-gray-600 hover:text-gray-900">
-                Sign in
-              </Link>
+              <NavAuth />
             </nav>
           </div>
         </header>
