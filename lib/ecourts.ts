@@ -23,72 +23,82 @@ export interface ECourtHearing {
   notes: string | null
 }
 
-function headers() {
-  return {
-    'x-api-key': KEY,
-    Accept: 'application/json',
-  }
+function authHeader() {
+  return { Authorization: `Bearer ${KEY}`, Accept: 'application/json' }
 }
 
 function normalise(raw: Record<string, unknown>): ECourtCase {
-  const hearings: ECourtHearing[] = ((raw.hearing_details ?? raw.hearings ?? []) as Record<string, unknown>[]).map(
-    (h) => ({
-      date: (h.hearing_date ?? h.date ?? '') as string,
-      purpose: (h.purpose_of_hearing ?? h.purpose ?? '') as string,
-      appeared: h.appeared != null ? Boolean(h.appeared) : null,
-      notes: (h.order_text ?? h.notes ?? null) as string | null,
-    })
-  )
+  const c = (raw.courtCaseData ?? raw) as Record<string, unknown>
+  const desc = raw.descriptions as Record<string, unknown> | undefined
+  const enumLookup = (desc?.enumLookup as Record<string, Record<string, string>> | undefined) ?? {}
+
+  // Resolve caseType code → full name (e.g. "MJC" → "Misc Judicial Cases")
+  const caseTypeCode = c.caseType as string ?? ''
+  const caseTypeFull = enumLookup.caseType?.[caseTypeCode] ?? caseTypeCode
+
+  const hearingHistory = (c.historyOfCaseHearings as Record<string, unknown>[]) ?? []
+  const hearings: ECourtHearing[] = hearingHistory.map((h) => ({
+    date: (h.hearingDate ?? h.businessOnDate ?? '') as string,
+    purpose: (h.purposeOfListing ?? '') as string,
+    appeared: null,
+    notes: null,
+  }))
+
+  const petitioners = c.petitioners as string[] ?? []
+  const respondents = c.respondents as string[] ?? []
 
   return {
-    cnrNumber: (raw.cnr_number ?? raw.cnrNumber ?? '') as string,
-    courtName: (raw.court_name ?? raw.courtName ?? '') as string,
-    courtState: (raw.state_name ?? raw.courtState ?? '') as string,
-    courtDistrict: (raw.district_name ?? raw.courtDistrict ?? '') as string,
-    caseType: (raw.case_type ?? raw.caseType ?? '') as string,
-    caseYear: Number(raw.registration_year ?? raw.caseYear ?? new Date().getFullYear()),
-    filingDate: (raw.registration_date ?? raw.filingDate ?? null) as string | null,
-    nextHearingDate: (raw.next_hearing_date ?? raw.nextHearingDate ?? null) as string | null,
+    cnrNumber: (c.cnr ?? '') as string,
+    courtName: (c.courtName ?? '') as string,
+    courtState: (c.state ?? '') as string,
+    courtDistrict: (c.district ?? '') as string,
+    caseType: caseTypeFull,
+    caseYear: Number(c.cnrYear ?? new Date().getFullYear()),
+    filingDate: (c.filingDate ?? null) as string | null,
+    nextHearingDate: (c.nextHearingDate ?? null) as string | null,
     hearings,
     parties: {
-      petitioner: (raw.petitioner_name ?? (raw.parties as Record<string, unknown>)?.petitioner ?? '') as string,
-      respondent: (raw.respondent_name ?? (raw.parties as Record<string, unknown>)?.respondent ?? '') as string,
+      petitioner: petitioners.join(', '),
+      respondent: respondents.join(', '),
     },
-    lastOrderSummary: (raw.order_summary ?? raw.lastOrderSummary ?? null) as string | null,
-    status: (raw.case_status ?? raw.status ?? 'ACTIVE') as string,
+    lastOrderSummary: null,
+    status: (c.caseStatus ?? 'PENDING') as string,
   }
 }
 
 export async function lookupCase(cnr: string): Promise<ECourtCase> {
-  const res = await fetch(`${BASE}/caseType/getCaseDetails?cnr_number=${cnr}`, {
-    headers: headers(),
+  const res = await fetch(`${BASE}/api/partner/case/${cnr}`, {
+    headers: authHeader(),
     next: { revalidate: 60 },
   })
-  if (!res.ok) throw new Error(`Case not found: ${cnr}`)
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body?.error?.message ?? `Case not found: ${cnr}`)
+  }
   const json = await res.json()
-  return normalise(json?.data ?? json)
+  return normalise(json.data)
 }
 
 export async function refreshCase(cnr: string): Promise<ECourtCase> {
-  const res = await fetch(`${BASE}/caseType/getCaseDetails?cnr_number=${cnr}`, {
-    headers: headers(),
-    cache: 'no-store',
+  // Queue a re-scrape from eCourts source
+  await fetch(`${BASE}/api/partner/case/${cnr}/refresh`, {
+    method: 'POST',
+    headers: authHeader(),
   })
-  if (!res.ok) throw new Error(`Failed to refresh case: ${cnr}`)
-  const json = await res.json()
-  return normalise(json?.data ?? json)
+  // Fetch current data (refresh is async; caller can retry later for latest)
+  return lookupCase(cnr)
 }
 
 export async function searchCases(
   query: string,
   filters: Record<string, string>
 ): Promise<ECourtCase[]> {
-  const params = new URLSearchParams({ name: query, ...filters })
-  const res = await fetch(`${BASE}/caseType/searchCase?${params}`, {
-    headers: headers(),
+  const params = new URLSearchParams({ query, ...filters })
+  const res = await fetch(`${BASE}/api/partner/search?${params}`, {
+    headers: authHeader(),
   })
   if (!res.ok) throw new Error('Search failed')
   const json = await res.json()
-  const list: Record<string, unknown>[] = json?.data ?? json ?? []
-  return list.map(normalise)
+  const results = (json.data?.results ?? []) as Record<string, unknown>[]
+  return results.map((r) => normalise({ courtCaseData: r }))
 }
