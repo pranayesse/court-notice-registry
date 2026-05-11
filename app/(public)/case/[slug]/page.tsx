@@ -18,8 +18,8 @@ import { transliterate } from 'transliteration'
 export const revalidate = 3600
 
 interface PageProps {
-  params: { slug: string }
-  searchParams: { respond?: string }
+  params: Promise<{ slug: string }>
+  searchParams: Promise<{ respond?: string }>
 }
 
 export async function generateStaticParams() {
@@ -50,7 +50,8 @@ async function getCase(slug: string) {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const caseData = await getCase(params.slug)
+  const { slug } = await params
+  const caseData = await getCase(slug)
   if (!caseData) return { title: 'Case not found' }
 
   return generateCaseMetadata({
@@ -61,7 +62,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     missedHearings: caseData.missedHearings,
     nextHearingDate: caseData.nextHearingDate,
     accusedAliases: caseData.accusedAliases,
-    slug: params.slug,
+    slug,
   })
 }
 
@@ -74,7 +75,9 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 export default async function CasePage({ params, searchParams }: PageProps) {
-  const caseData = await getCase(params.slug)
+  const { slug } = await params
+  const { respond } = await searchParams
+  const caseData = await getCase(slug)
   if (!caseData) notFound()
 
   const isResolved = ['RESOLVED', 'DISMISSED', 'ACQUITTED'].includes(caseData.status)
@@ -281,7 +284,7 @@ export default async function CasePage({ params, searchParams }: PageProps) {
               {caseData.accusedStatement}
             </blockquote>
           </div>
-        ) : searchParams.respond === 'true' ? (
+        ) : respond === 'true' ? (
           <div className="bg-white rounded-xl border p-6 mb-6">
             <h2 className="font-semibold text-lg mb-4">Submit Your Response</h2>
             <AccusedResponseForm caseId={caseData.id} slug={caseData.slug} />

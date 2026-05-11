@@ -11,12 +11,13 @@ export const metadata: Metadata = {
 }
 
 interface VerifyPageProps {
-  searchParams: { q?: string; cnr?: string }
+  searchParams: Promise<{ q?: string; cnr?: string }>
 }
 
 export default async function VerifyPage({ searchParams }: VerifyPageProps) {
-  const q = searchParams.q?.trim() ?? ''
-  const cnr = searchParams.cnr?.trim().toUpperCase() ?? ''
+  const { q: rawQ, cnr: rawCnr } = await searchParams
+  const q = rawQ?.trim() ?? ''
+  const cnr = rawCnr?.trim().toUpperCase() ?? ''
 
   let results: Awaited<ReturnType<typeof prisma.case.findMany>> = []
   let searched = false

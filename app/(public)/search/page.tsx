@@ -7,11 +7,12 @@ import { CaseStatus, Prisma } from '@prisma/client'
 export const dynamic = 'force-dynamic'
 
 interface SearchPageProps {
-  searchParams: { q?: string; state?: string; district?: string; type?: string; year?: string; status?: string }
+  searchParams: Promise<{ q?: string; state?: string; district?: string; type?: string; year?: string; status?: string }>
 }
 
-export function generateMetadata({ searchParams }: SearchPageProps): Metadata {
-  const q = searchParams.q ?? ''
+export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
+  const sp = await searchParams
+  const q = sp.q ?? ''
   return {
     title: q ? `Search results for "${q}" — Court Notice Registry` : 'Search Court Cases — PendingCase.in',
     robots: { index: false },
@@ -19,8 +20,8 @@ export function generateMetadata({ searchParams }: SearchPageProps): Metadata {
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const q = searchParams.q?.trim() ?? ''
-  const { state, district, type, year, status } = searchParams
+  const { q: rawQ, state, district, type, year, status } = await searchParams
+  const q = rawQ?.trim() ?? ''
 
   const where: Prisma.CaseWhereInput = {}
 
