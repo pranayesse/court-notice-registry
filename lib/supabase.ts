@@ -1,11 +1,15 @@
 import { createClient as createBrowserClientFn } from '@/utils/supabase/client'
 import { createClient } from '@supabase/supabase-js'
 
-// Service-role client for API routes (server-side only, uses service_role key)
+// Server-side client for API routes.
+// Uses service_role key when available (admin ops), falls back to publishable key
+// for token validation — getUser(token) works with either key.
 export function createServiceClient() {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+    || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    key,
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
 }
