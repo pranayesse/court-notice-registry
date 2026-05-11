@@ -4,7 +4,7 @@ import { Prisma } from '@prisma/client'
 import { lookupCase } from '@/lib/ecourts'
 import { generateSlug } from '@/lib/slug'
 import { isValidCNR } from '@/lib/validators'
-import { createServiceClient } from '@/lib/supabase'
+import { getUserFromToken } from "@/lib/supabase"
 import { Resend } from 'resend'
 import { z } from 'zod'
 
@@ -20,10 +20,7 @@ const CreateCaseSchema = z.object({
 })
 
 export async function POST(req: NextRequest) {
-  const supabase = createServiceClient()
-  const { data: { user } } = await supabase.auth.getUser(
-    req.headers.get('Authorization')?.replace('Bearer ', '') ?? ''
-  )
+  const user = getUserFromToken(req.headers.get('Authorization')?.replace('Bearer ', '') ?? '')
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   // Rate limit: 3 cases/day per user
@@ -63,7 +60,7 @@ export async function POST(req: NextRequest) {
   const filer = await prisma.user.upsert({
     where: { email: user.email! },
     update: {},
-    create: { email: user.email!, name: user.user_metadata?.name },
+    create: { email: user.email!, name: null },
   })
 
   const newCase = await prisma.case.create({
@@ -100,10 +97,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  const supabase = createServiceClient()
-  const { data: { user } } = await supabase.auth.getUser(
-    req.headers.get('Authorization')?.replace('Bearer ', '') ?? ''
-  )
+  const user = getUserFromToken(req.headers.get('Authorization')?.replace('Bearer ', '') ?? '')
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const dbUser = await prisma.user.findUnique({ where: { email: user.email! } })

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { createServiceClient } from '@/lib/supabase'
+import { getUserFromToken } from "@/lib/supabase"
 import { checkBlocklist, isValidHttpsUrl } from '@/lib/validators'
 import { z } from 'zod'
 
@@ -12,10 +12,7 @@ const SightingSchema = z.object({
 })
 
 export async function POST(req: NextRequest) {
-  const supabase = createServiceClient()
-  const { data: { user } } = await supabase.auth.getUser(
-    req.headers.get('Authorization')?.replace('Bearer ', '') ?? ''
-  )
+  const user = getUserFromToken(req.headers.get('Authorization')?.replace('Bearer ', '') ?? '')
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json()

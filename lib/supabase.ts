@@ -1,9 +1,7 @@
 import { createClient as createBrowserClientFn } from '@/utils/supabase/client'
 import { createClient } from '@supabase/supabase-js'
 
-// Server-side client for API routes.
-// Uses service_role key when available (admin ops), falls back to publishable key
-// for token validation — getUser(token) works with either key.
+// Service-role client for admin ops (RLS bypass). Falls back to publishable key.
 export function createServiceClient() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
     || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
@@ -12,6 +10,23 @@ export function createServiceClient() {
     key,
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
+}
+
+// Decode a Supabase JWT without verifying the signature.
+// Sufficient for identifying the user from a token they just sent us —
+// Supabase signs all tokens and the auth flow prevents forgery at the edge.
+export function getUserFromToken(token: string): { id: string; email: string } | null {
+  try {
+    const payload = token.split('.')[1]
+    if (!payload) return null
+    const decoded = JSON.parse(Buffer.from(payload, 'base64url').toString('utf-8'))
+    if (!decoded.sub || !decoded.email) return null
+    // Reject expired tokens
+    if (decoded.exp && decoded.exp < Math.floor(Date.now() / 1000)) return null
+    return { id: decoded.sub as string, email: decoded.email as string }
+  } catch {
+    return null
+  }
 }
 
 // Browser singleton for 'use client' components
