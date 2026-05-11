@@ -26,15 +26,23 @@ export default function RegisterPage() {
     setLoading(true)
     setError('')
 
-    const { error } = await supabase.auth.signUp({
+    const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { name } },
     })
 
+    if (signUpError) {
+      setLoading(false)
+      setError(signUpError.message)
+      return
+    }
+
+    // Auto sign-in immediately after signup (skips email confirmation)
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
-    if (error) {
-      setError(error.message)
+    if (signInError) {
+      setError(signInError.message)
     } else {
       router.push('/dashboard')
     }
