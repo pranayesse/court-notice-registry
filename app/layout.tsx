@@ -12,6 +12,9 @@ export const metadata: Metadata = {
   description:
     'Search and file public notices for pending court cases in India. Verified CNR data from eCourts.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL ?? 'https://pendingcase.in'),
+  verification: {
+    google: 'qjc2FaLLyhfeam4jROClpBwKjM56S77cuyeNL_TzzEs',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
