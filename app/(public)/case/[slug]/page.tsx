@@ -165,7 +165,17 @@ export default async function CasePage({ params, searchParams }: PageProps) {
 
         {/* Court details */}
         <div className="bg-white rounded-xl border p-6 mb-6">
-          <h2 className="font-semibold text-lg mb-4">Court Details</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-semibold text-lg">Court Details</h2>
+            <a
+              href={`https://services.ecourts.gov.in/ecourtindiaservices/index.php?p=casestatus/getCNRDetails&CNR_number=${caseData.cnrNumber}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+            >
+              Verify on eCourts ↗
+            </a>
+          </div>
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
             {[
               ['Court', caseData.courtName],

@@ -57,7 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 Verify a person
               </Link>
               <a
-                href={`mailto:${process.env.GRIEVANCE_OFFICER_EMAIL ?? 'grievance@pendingcase.in'}`}
+                href={`mailto:${process.env.GRIEVANCE_OFFICER_EMAIL ?? 'pranay.mokida@protonmail.com'}`}
                 className="hover:text-gray-800"
               >
                 Grievance Officer
@@ -68,7 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
           </div>
           <div className="max-w-5xl mx-auto px-4 pb-4 text-xs text-gray-400">
-            IT Act 2000 §79 Grievance Officer: grievance@pendingcase.in — response within 72 hours.
+            IT Act 2000 §79 Grievance Officer: pranay.mokida@protonmail.com — response within 72 hours.
           </div>
         </footer>
 
