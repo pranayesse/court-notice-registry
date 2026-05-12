@@ -21,11 +21,11 @@ The core insight: **courts already require newspaper public notices for abscondi
 
 ## Strategic angles
 
-**SEO flywheel is the real moat.** Every case filed makes the site larger, improving domain authority, making future cases rank better. Filers share links on WhatsApp, driving organic backlinks. No ads needed — the people filing cases *want* the world to find it.
+**SEO is the distribution.** Each case filed is a permanent, indexed page. As the database grows, so does domain authority — future cases rank faster and higher. Filers naturally share their case links, which drives backlinks without any marketing spend.
 
-**B2B background verification** is the biggest revenue driver. Companies like AuthBridge and IDfy charge ₹150–500 per name check. A real-time, CNR-verified database undercuts them on price while being more accurate.
+**B2B background checks are the revenue model.** AuthBridge, IDfy, and similar services charge ₹150–500 per lookup and use stale data. A live, CNR-verified database is both cheaper and more accurate. The API layer is already there.
 
-**Privacy by design.** The crowd-sourced sighting layer is strictly "public URLs only" — LinkedIn profiles, company registrations, news articles. Phone numbers, home addresses, Aadhaar/PAN numbers, and GPS coordinates are blocked at the submission layer, not moderation.
+**Privacy by design, not policy.** The sightings layer only accepts public URLs — LinkedIn profiles, news articles, company registrations. Private information (phone numbers, home addresses, Aadhaar/PAN, GPS) is blocked at the input layer. Moderation is a fallback, not the primary control.
 
 ## Stack
 
