@@ -5,7 +5,6 @@ import { lookupCase } from '@/lib/ecourts'
 import { generateSlug } from '@/lib/slug'
 import { isValidCNR } from '@/lib/validators'
 import { getUserFromToken } from "@/lib/supabase"
-import { sendMail } from '@/lib/mailer'
 import { z } from 'zod'
 
 function json(body: unknown, status = 200) {
@@ -95,16 +94,6 @@ export async function POST(req: NextRequest) {
     }
     console.error('prisma.case.create failed:', err)
     return json({ error: 'Database error. Please try again.' }, 500)
-  }
-
-  try {
-    await sendMail({
-      to: user.email!,
-      subject: `Case filed: ${accusedName} — ${cnrNumber}`,
-      html: `<p>Your case notice has been published at <a href="${process.env.NEXT_PUBLIC_BASE_URL}/case/${slug}">${process.env.NEXT_PUBLIC_BASE_URL}/case/${slug}</a></p>`,
-    })
-  } catch {
-    // Email failure is non-fatal
   }
 
   return NextResponse.json(newCase, { status: 201 })

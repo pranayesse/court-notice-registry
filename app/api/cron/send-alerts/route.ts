@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { sendMail } from '@/lib/mailer'
-import { hearingReminderHtml } from '@/lib/emails/hearing-reminder'
 import twilio from 'twilio'
 
 function getTwilio() { return twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN) }
@@ -42,17 +40,7 @@ export async function POST(req: NextRequest) {
 
     try {
       if (alert.email) {
-        await sendMail({
-          to: alert.email,
-          subject,
-          html: hearingReminderHtml({
-            accusedName: c.accusedName,
-            courtName: c.courtName,
-            nextDate,
-            caseUrl: `${base}/case/${c.slug}`,
-            cnrNumber: c.cnrNumber,
-          }),
-        })
+        // Email sending not yet configured
       }
 
       if (alert.phone) {
