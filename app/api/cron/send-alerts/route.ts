@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendMail } from '@/lib/mailer'
+import { hearingReminderHtml } from '@/lib/emails/hearing-reminder'
 import twilio from 'twilio'
 
 function getTwilio() { return twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN) }
@@ -44,7 +45,13 @@ export async function POST(req: NextRequest) {
         await sendMail({
           to: alert.email,
           subject,
-          html: `<p>${body.replace(/\n/g, '<br>')}</p>`,
+          html: hearingReminderHtml({
+            accusedName: c.accusedName,
+            courtName: c.courtName,
+            nextDate,
+            caseUrl: `${base}/case/${c.slug}`,
+            cnrNumber: c.cnrNumber,
+          }),
         })
       }
 
