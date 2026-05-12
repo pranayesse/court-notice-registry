@@ -66,4 +66,4 @@ NEXT_PUBLIC_BASE_URL=
 - Case data is sourced exclusively from eCourts India (public government records)
 - No Aadhaar, PAN, phone numbers, or location data is stored or displayed
 - Dispute and removal requests handled within 72 hours (IT Act 2000 §79)
-- Grievance Officer: grievance@pendingcase.in
+- Grievance Officer: pranay.esse@protonmail.com
