@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { transliterate } from 'transliteration'
+import AlertForm from '@/components/AlertForm'
 
 export const revalidate = 86400
 
@@ -198,24 +199,9 @@ export default async function CasePage({ params, searchParams }: PageProps) {
             <h2 className="font-semibold text-lg mb-1">Next Hearing</h2>
             <p className="text-2xl font-bold text-amber-700 mb-3">{nextDate}</p>
             <p className="text-sm text-gray-600 mb-4">
-              Get an alert before this hearing via email or WhatsApp.
+              Get an email reminder before this hearing.
             </p>
-            <form action="/api/alerts" method="POST" className="flex flex-col sm:flex-row gap-2">
-              <input type="hidden" name="caseId" value={caseData.id} />
-              <input type="hidden" name="type" value="HEARING_REMINDER" />
-              <input
-                type="email"
-                name="email"
-                placeholder="your@email.com"
-                className="border rounded px-3 py-2 flex-1 text-sm"
-              />
-              <button
-                type="submit"
-                className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700 text-sm font-medium"
-              >
-                Subscribe
-              </button>
-            </form>
+            <AlertForm caseId={caseData.id} />
           </div>
         )}
 

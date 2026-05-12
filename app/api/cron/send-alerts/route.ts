@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { Resend } from 'resend'
+import { sendMail } from '@/lib/mailer'
 import twilio from 'twilio'
 
-function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 function getTwilio() { return twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN) }
 
 export async function POST(req: NextRequest) {
@@ -42,8 +41,7 @@ export async function POST(req: NextRequest) {
 
     try {
       if (alert.email) {
-        await getResend().emails.send({
-          from: 'Court Notice Registry <noreply@pendingcase.in>',
+        await sendMail({
           to: alert.email,
           subject,
           html: `<p>${body.replace(/\n/g, '<br>')}</p>`,

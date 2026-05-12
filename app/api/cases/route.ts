@@ -5,14 +5,12 @@ import { lookupCase } from '@/lib/ecourts'
 import { generateSlug } from '@/lib/slug'
 import { isValidCNR } from '@/lib/validators'
 import { getUserFromToken } from "@/lib/supabase"
-import { Resend } from 'resend'
+import { sendMail } from '@/lib/mailer'
 import { z } from 'zod'
 
 function json(body: unknown, status = 200) {
   return NextResponse.json(body, { status })
 }
-
-function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 
 const CreateCaseSchema = z.object({
   cnrNumber: z.string().refine(isValidCNR, 'Invalid CNR format'),
@@ -100,11 +98,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    await getResend().emails.send({
-      from: 'Court Notice Registry <noreply@pendingcase.in>',
+    await sendMail({
       to: user.email!,
       subject: `Case filed: ${accusedName} — ${cnrNumber}`,
-      html: `<p>Your case notice has been published at <a href="${process.env.NEXT_PUBLIC_BASE_URL}/case/${slug}">pendingcase.in/case/${slug}</a></p>`,
+      html: `<p>Your case notice has been published at <a href="${process.env.NEXT_PUBLIC_BASE_URL}/case/${slug}">${process.env.NEXT_PUBLIC_BASE_URL}/case/${slug}</a></p>`,
     })
   } catch {
     // Email failure is non-fatal

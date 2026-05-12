@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getUserFromToken } from "@/lib/supabase"
-import { Resend } from 'resend'
+import { sendMail } from '@/lib/mailer'
 import { z } from 'zod'
-
-function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 
 const DisputeSchema = z.object({
   caseId: z.string().cuid(),
@@ -40,10 +38,9 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  const grievanceEmail = process.env.GRIEVANCE_OFFICER_EMAIL ?? 'grievance@pendingcase.in'
+  const grievanceEmail = process.env.GRIEVANCE_OFFICER_EMAIL ?? 'pranay.esse@protonmail.com'
   try {
-    await getResend().emails.send({
-      from: 'Court Notice Registry <noreply@pendingcase.in>',
+    await sendMail({
       to: grievanceEmail,
       subject: `New dispute: ${reason} for case ${caseId}`,
       html: `<p>Dispute filed by ${user.email} for case ${caseId}.<br/>Reason: ${reason}<br/>Description: ${description}</p>`,
