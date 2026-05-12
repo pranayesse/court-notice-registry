@@ -13,7 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const caseUrls: MetadataRoute.Sitemap = cases.map((c) => ({
     url: `${BASE_URL}/case/${c.slug}`,
     lastModified: c.updatedAt,
-    changeFrequency: 'weekly',
+    changeFrequency: 'daily',
     priority: 0.8,
   }))
 
@@ -33,7 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     {
       url: `${BASE_URL}/verify`,
       lastModified: new Date(),
-      changeFrequency: 'weekly',
+      changeFrequency: 'daily',
       priority: 0.7,
     },
     ...caseUrls,
