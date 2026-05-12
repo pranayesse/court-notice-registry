@@ -41,12 +41,16 @@ export async function POST(req: NextRequest) {
   }
 
   const grievanceEmail = process.env.GRIEVANCE_OFFICER_EMAIL ?? 'grievance@pendingcase.in'
-  await getResend().emails.send({
-    from: 'Court Notice Registry <noreply@pendingcase.in>',
-    to: grievanceEmail,
-    subject: `New dispute: ${reason} for case ${caseId}`,
-    html: `<p>Dispute filed by ${user.email} for case ${caseId}.<br/>Reason: ${reason}<br/>Description: ${description}</p>`,
-  })
+  try {
+    await getResend().emails.send({
+      from: 'Court Notice Registry <noreply@pendingcase.in>',
+      to: grievanceEmail,
+      subject: `New dispute: ${reason} for case ${caseId}`,
+      html: `<p>Dispute filed by ${user.email} for case ${caseId}.<br/>Reason: ${reason}<br/>Description: ${description}</p>`,
+    })
+  } catch {
+    // Non-fatal — dispute is already recorded in the database
+  }
 
   return NextResponse.json(dispute, { status: 201 })
 }
