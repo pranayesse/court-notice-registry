@@ -52,52 +52,62 @@ export default function NewCasePage() {
     e.preventDefault()
     setCnrLoading(true)
     setCnrError('')
-    const res = await fetch(`/api/ecourts/lookup?cnr=${encodeURIComponent(cnr)}`)
-    setCnrLoading(false)
-    if (!res.ok) {
-      const data = await res.json()
-      setCnrError(data.error ?? 'CNR not found')
-    } else {
-      const data = await res.json()
-      setPreview(data)
-      setStep(2)
+    try {
+      const res = await fetch(`/api/ecourts/lookup?cnr=${encodeURIComponent(cnr)}`)
+      setCnrLoading(false)
+      if (!res.ok) {
+        const data = await res.json()
+        setCnrError(data.error ?? 'CNR not found')
+      } else {
+        const data = await res.json()
+        setPreview(data)
+        setStep(2)
+      }
+    } catch {
+      setCnrLoading(false)
+      setCnrError('Network error. Please try again.')
     }
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  async function handleSubmit() {
     setSubmitLoading(true)
     setSubmitError('')
 
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
-      router.push('/login')
-      return
-    }
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        setSubmitLoading(false)
+        setSubmitError('Your session has expired. Please sign in again.')
+        return
+      }
 
-    const res = await fetch('/api/cases', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({
-        cnrNumber: cnr,
-        accusedName,
-        accusedAliases: aliases.split(',').map((a) => a.trim()).filter(Boolean),
-        accusedCity: city,
-        accusedEmployer: employer,
-        filerRole,
-      }),
-    })
+      const res = await fetch('/api/cases', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          cnrNumber: cnr,
+          accusedName,
+          accusedAliases: aliases.split(',').map((a) => a.trim()).filter(Boolean),
+          accusedCity: city,
+          accusedEmployer: employer,
+          filerRole,
+        }),
+      })
 
-    setSubmitLoading(false)
-    if (res.ok) {
-      const data = await res.json()
-      router.push(`/case/${data.slug}`)
-    } else {
-      const data = await res.json()
-      setSubmitError(data.error ?? 'Failed to file case')
+      setSubmitLoading(false)
+      if (res.ok) {
+        const data = await res.json()
+        router.push(`/case/${data.slug}`)
+      } else {
+        const data = await res.json()
+        setSubmitError(data.error ?? 'Failed to file case')
+      }
+    } catch {
+      setSubmitLoading(false)
+      setSubmitError('Something went wrong. Please try again.')
     }
   }
 
