@@ -2,10 +2,12 @@ import nodemailer from 'nodemailer'
 
 function getTransport() {
   return nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp-relay.brevo.com',
+    port: 587,
+    secure: false,
     auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASSWORD,
+      user: process.env.BREVO_SMTP_LOGIN,
+      pass: process.env.BREVO_SMTP_KEY,
     },
   })
 }
@@ -20,7 +22,7 @@ export async function sendMail({
   html: string
 }) {
   await getTransport().sendMail({
-    from: `PendingCase.in <${process.env.GMAIL_USER}>`,
+    from: `PendingCase.in <${process.env.BREVO_SENDER_EMAIL}>`,
     to,
     subject,
     html,
