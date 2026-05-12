@@ -15,7 +15,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { transliterate } from 'transliteration'
 
-export const revalidate = 3600
+export const revalidate = 86400
 
 interface PageProps {
   params: Promise<{ slug: string }>

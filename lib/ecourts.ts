@@ -69,7 +69,7 @@ function normalise(raw: Record<string, unknown>): ECourtCase {
 export async function lookupCase(cnr: string): Promise<ECourtCase> {
   const res = await fetch(`${BASE}/api/partner/case/${cnr}`, {
     headers: authHeader(),
-    next: { revalidate: 60 },
+    next: { revalidate: 86400 },
   })
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
