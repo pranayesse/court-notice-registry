@@ -8,6 +8,10 @@ import { getUserFromToken } from "@/lib/supabase"
 import { Resend } from 'resend'
 import { z } from 'zod'
 
+function json(body: unknown, status = 200) {
+  return NextResponse.json(body, { status })
+}
+
 function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 
 const CreateCaseSchema = z.object({
@@ -63,28 +67,37 @@ export async function POST(req: NextRequest) {
     create: { email: user.email!, name: null },
   })
 
-  const newCase = await prisma.case.create({
-    data: {
-      cnrNumber,
-      slug,
-      accusedName,
-      accusedAliases,
-      accusedCity,
-      accusedEmployer,
-      filerRole,
-      filedById: filer.id,
-      isVerified: true,
-      courtName: ecourtsData.courtName,
-      courtState: ecourtsData.courtState,
-      courtDistrict: ecourtsData.courtDistrict,
-      caseType: ecourtsData.caseType,
-      caseYear: ecourtsData.caseYear,
-      filingDate: ecourtsData.filingDate ? new Date(ecourtsData.filingDate) : null,
-      nextHearingDate: ecourtsData.nextHearingDate ? new Date(ecourtsData.nextHearingDate) : null,
-      hearingCount: ecourtsData.hearings?.length ?? 0,
-      rawEcourtsData: ecourtsData as unknown as Prisma.InputJsonValue,
-    },
-  })
+  let newCase
+  try {
+    newCase = await prisma.case.create({
+      data: {
+        cnrNumber,
+        slug,
+        accusedName,
+        accusedAliases,
+        accusedCity,
+        accusedEmployer,
+        filerRole,
+        filedById: filer.id,
+        isVerified: true,
+        courtName: ecourtsData.courtName,
+        courtState: ecourtsData.courtState,
+        courtDistrict: ecourtsData.courtDistrict,
+        caseType: ecourtsData.caseType,
+        caseYear: ecourtsData.caseYear,
+        filingDate: ecourtsData.filingDate ? new Date(ecourtsData.filingDate) : null,
+        nextHearingDate: ecourtsData.nextHearingDate ? new Date(ecourtsData.nextHearingDate) : null,
+        hearingCount: ecourtsData.hearings?.length ?? 0,
+        rawEcourtsData: ecourtsData as unknown as Prisma.InputJsonValue,
+      },
+    })
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+      return json({ error: 'A notice for this CNR has already been filed.' }, 409)
+    }
+    console.error('prisma.case.create failed:', err)
+    return json({ error: 'Database error. Please try again.' }, 500)
+  }
 
   try {
     await getResend().emails.send({
