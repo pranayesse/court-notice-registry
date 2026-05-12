@@ -98,11 +98,10 @@ export default function NewCasePage() {
       })
 
       setSubmitLoading(false)
+      const data = await res.json().catch(() => ({}))
       if (res.ok) {
-        const data = await res.json()
         router.push(`/case/${data.slug}`)
       } else {
-        const data = await res.json()
         setSubmitError(data.error ?? 'Failed to file case')
       }
     } catch {

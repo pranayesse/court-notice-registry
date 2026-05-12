@@ -86,12 +86,16 @@ export async function POST(req: NextRequest) {
     },
   })
 
-  await getResend().emails.send({
-    from: 'Court Notice Registry <noreply@pendingcase.in>',
-    to: user.email!,
-    subject: `Case filed: ${accusedName} — ${cnrNumber}`,
-    html: `<p>Your case notice has been published at <a href="${process.env.NEXT_PUBLIC_BASE_URL}/case/${slug}">pendingcase.in/case/${slug}</a></p>`,
-  })
+  try {
+    await getResend().emails.send({
+      from: 'Court Notice Registry <noreply@pendingcase.in>',
+      to: user.email!,
+      subject: `Case filed: ${accusedName} — ${cnrNumber}`,
+      html: `<p>Your case notice has been published at <a href="${process.env.NEXT_PUBLIC_BASE_URL}/case/${slug}">pendingcase.in/case/${slug}</a></p>`,
+    })
+  } catch {
+    // Email failure is non-fatal
+  }
 
   return NextResponse.json(newCase, { status: 201 })
 }
