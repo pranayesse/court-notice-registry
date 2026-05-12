@@ -7,19 +7,18 @@ export function generateCaseMetadata(params: {
   courtName: string
   cnrNumber: string
   caseType: string
-  missedHearings: number
   nextHearingDate: Date | null
   accusedAliases: string[]
   slug: string
 }): Metadata {
-  const { accusedName, courtName, cnrNumber, caseType, missedHearings, nextHearingDate, accusedAliases, slug } = params
+  const { accusedName, courtName, cnrNumber, caseType, nextHearingDate, accusedAliases, slug } = params
 
   const nextDate = nextHearingDate
     ? new Intl.DateTimeFormat('en-IN', { dateStyle: 'long' }).format(new Date(nextHearingDate))
     : 'TBD'
 
   const title = `Pending Case: ${accusedName} — ${courtName} · ${cnrNumber}`
-  const description = `⚠️ ${accusedName} has a pending ${caseType} case in ${courtName}. ${missedHearings} hearings missed. Next date: ${nextDate}.`
+  const description = `⚠️ ${accusedName} has a pending ${caseType} case in ${courtName}. Next hearing: ${nextDate}.`
 
   return {
     title,

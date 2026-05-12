@@ -60,7 +60,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     courtName: caseData.courtName,
     cnrNumber: caseData.cnrNumber,
     caseType: caseData.caseType,
-    missedHearings: caseData.missedHearings,
     nextHearingDate: caseData.nextHearingDate,
     accusedAliases: caseData.accusedAliases,
     slug,
@@ -187,7 +186,7 @@ export default async function CasePage({ params, searchParams }: PageProps) {
               ['Filing Date', caseData.filingDate
                 ? new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium' }).format(new Date(caseData.filingDate))
                 : '—'],
-              ['Hearings', `${caseData.hearingCount} total, ${caseData.missedHearings} missed`],
+              ['Hearings', `${caseData.hearingCount} total`],
             ].map(([label, value]) => (
               <div key={label as string}>
                 <dt className="text-gray-400 text-xs uppercase tracking-wide">{label}</dt>
