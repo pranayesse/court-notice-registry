@@ -168,7 +168,7 @@ export default async function CasePage({ params, searchParams }: PageProps) {
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-lg">Court Details</h2>
             <a
-              href={`https://services.ecourts.gov.in/ecourtindiaservices/index.php?p=casestatus/getCNRDetails&CNR_number=${caseData.cnrNumber}`}
+              href={`https://ecourtsindia.com/cnr/${caseData.cnrNumber}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
