@@ -2,7 +2,6 @@
 
 A legal transparency platform that makes India's public court case data **findable, searchable, and shareable**. Courts already require public notices in newspapers for absconding accused — this is the digital, cheaper, permanent version.
 
-Live: [court-notice-registry.vercel.app](https://court-notice-registry.vercel.app)
 
 ## Why this exists
 
